@@ -55,6 +55,7 @@ static struct option getopt_options[] = {
 	{"set-all", no_argument, 0, 'S'},
 	{"edit", no_argument, 0, 'e'},
 	{"raw", no_argument, 0, 'r'},
+	{"keep-padding", no_argument, 0, 'k'},
 	{NULL, 0, 0, 0}
 };
 
@@ -111,6 +112,9 @@ ot::options ot::parse_options(int argc, char** argv, FILE* comments_input)
 			break;
 		case 'r':
 			opt.raw = true;
+			break;
+		case 'k':
+			opt.keep_padding = true;
 			break;
 		case ':':
 			throw status {st::bad_arguments, "Missing value for option '"s + argv[optind - 1] + "'."};
@@ -294,18 +298,21 @@ static void edit_tags(ot::opus_tags& tags, const ot::options& opt)
 	}
 
 	int extra_diff_size = added_size - deleted_size;
-	if (extra_diff_size > 0) {
-		if (extra_diff_size < tags.extra_data.size()) {
-			tags.extra_data.erase(tags.extra_data.size()-extra_diff_size);
-		} else {
-			tags.extra_data.clear();
-		}
-	} else if (extra_diff_size < 0) {
-		extra_diff_size *= -1;
-		if (!tags.extra_data.empty()) {
-			tags.extra_data.append(extra_diff_size, tags.extra_data.back());
-		} else {
-			tags.extra_data = std::string(extra_diff_size, '\0');
+	bool preserve = !tags.extra_data.empty() && (static_cast<uint8_t>(tags.extra_data.front()) & 1);
+	if (!opt.keep_padding && !preserve) {
+		if (extra_diff_size > 0) {
+			if (extra_diff_size < tags.extra_data.size()) {
+				tags.extra_data.erase(tags.extra_data.size()-extra_diff_size);
+			} else {
+				tags.extra_data.clear();
+			}
+	    } else if (extra_diff_size < 0) {
+			extra_diff_size *= -1;
+			if (!tags.extra_data.empty()) {
+				tags.extra_data.append(extra_diff_size, tags.extra_data.back());
+			} else {
+				tags.extra_data = std::string(extra_diff_size, '\0');
+			}
 		}
 	}
 }

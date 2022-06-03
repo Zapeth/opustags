@@ -460,6 +460,11 @@ struct options {
 	 * extract and set as-is, encoding conversion would get in the way.
 	 */
 	bool raw = false;
+	/**
+	 * Preserve the size of padding space in comment header (this happens in any case if
+	 * LSB of first byte in sequence is set, as described in the spec)
+	 */
+	bool keep_padding = false;
 };
 
 /**
