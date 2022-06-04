@@ -38,6 +38,7 @@ Options:
   -s, --set FIELD=VALUE         replace a comment
   -S, --set-all                 import comments from standard input
   -e, --edit                    edit tags interactively in VISUAL/EDITOR
+  -k, --keep-padding            dont change padding data in comment header
   --raw                         disable encoding conversion
 
 See the man page for extensive documentation.
@@ -71,7 +72,7 @@ ot::options ot::parse_options(int argc, char** argv, FILE* comments_input)
 		throw status {st::bad_arguments, "No arguments specified. Use -h for help."};
 	int c;
 	optind = 0;
-	while ((c = getopt_long(argc, argv, ":ho:iyd:a:s:DSe", getopt_options, NULL)) != -1) {
+	while ((c = getopt_long(argc, argv, ":ho:iyd:a:s:DSek", getopt_options, NULL)) != -1) {
 		switch (c) {
 		case 'h':
 			opt.print_help = true;
